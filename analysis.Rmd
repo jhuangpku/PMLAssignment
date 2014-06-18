@@ -1,0 +1,66 @@
+Manner Prediction
+========================================================
+
+
+This data is from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways.The goal of your project is to predict the manner in which they did the exercise.
+
+Part1. Load Data
+------------------------
+
+
+First, we load the data.
+
+```{r}
+training<-read.csv("data/pml-training.csv")
+testing<-read.csv("data/pml-testing.csv")
+
+```
+
+Part2. Choose Variable
+------------------------
+
+We use summary function to explore the variable.
+```{r}
+summary(training)
+```
+
+At first glance, I found there are some variables missing values(NA or empty charactor).And the number of missing values is too large(97% are missing), so I decided to remove those variables.
+
+```{r}
+na_len<-apply(training, 2, function(x) sum(is.na(x) | x==""))
+index_del<-which(na_len>0)
+```
+
+More specifically, I found that x means the sample index. So it should be removed. User_name and three time variables means people who and when perform this exercise, I think it can be safely removed. 
+
+I read the paper and found that the new_window means whether or not this sample is the start of the movement, I choose to remove it.
+
+Num_window means how many samples of this movement is cut, I found that it is highly correlated with the experiment index.( which means all sample from one person perform one exercise shares the same num_window) And It is not the variable produced by the movement, so it should be removed also.
+
+To summary, we remove the first 7 variable and the variable with missing values.
+```{r}
+sub_training<-training[,-c(1:7,index_del)]
+sub_testing<-testing[,-c(1:7,index_del)]
+```
+
+Part3. Model Comparison
+---------------------------
+
+Because the data is too large, we only use 20% of them for training, and the rest for testing to do the cross validation. 
+
+The sample error means algorithm gives the different class from class variable in data.And random forest gives 97.88% accuracy(error: 2.12%), while decision tree gives 52.64%(error 47.36%), So we choose random forest to train the whole model, and perform on test set.
+
+R code is here:
+```
+inTrain<- createDataPartition(y = sub_training$classe, p=0.2,list=FALSE) 
+train<-sub_training[inTrain,]
+test<-sub_training[-inTrain,]
+rf_modFit<-train(classe ~.,data = train,method="rf")
+rpart_modFit <- train(classe ~.,data = train,method="rpart")
+confusionMatrix(test$classe, predict(rf_modFit, test))
+confusionMatrix(test$classe, predict(rpart_modFit, test))
+```
+```
+rf_total_modFit<-train(classe ~., data=sub_training, method="rf")
+answers = predict(modFit, sub_testing)
+```
