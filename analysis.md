@@ -400,9 +400,9 @@ sub_testing <- testing[, -c(1:7, index_del)]
 Part3. Model Comparison
 ---------------------------
 
-Because the data is too large, we only use 20% of them to do training, and 80% to do testing, just to compare method accuracy 
+Because the data is too large, we only use 20% of them for training, and the rest for testing to do the cross validation. 
 
-And random forest gives 97.88% accuracy, while decision tree gives 52.64%, So we choose random forest to train the whole model, and perform on test set.
+The sample error means algorithm gives the different class from class variable in data.And random forest gives 97.88% accuracy(error: 2.12%), while decision tree gives 52.64%(error 47.36%), So we choose random forest to train the whole model, and perform on test set.
 
 R code is here:
 ```
